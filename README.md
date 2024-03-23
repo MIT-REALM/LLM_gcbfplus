@@ -1,8 +1,6 @@
-# GCBF+
+# LLM-GCBF+ for deadlock resolution
 
-Jax Official Implementation of Paper: [S Zhang*](https://syzhang092218-source.github.io), [Oswin So*](https://oswinso.xyz/), [K Garg](https://kunalgarg.mit.edu/), [C Fan](https://chuchu.mit.edu): "[GCBF+: A Neural Graph Control Barrier Function Framework for Distributed Safe Multi-Agent Control](https://mit-realm.github.io/gcbfplus-website/)". 
-
-A much improved version of [GCBFv0](https://mit-realm.github.io/gcbf-website/)!
+Jax Official Implementation of Paper: [K Garg*](https://kunalgarg.mit.edu/), [J Arkin](https://aeroastro.mit.edu/realm/team/jake-arkin/), [S Zhang](https://syzhang092218-source.github.io), [N Roy](https://groups.csail.mit.edu/rrg/index.php?n=Main.HomePage), [C Fan](https://chuchu.mit.edu): "[Large Language Models to the Rescue: Deadlock Resolution in Multi-Robot Systems](https://mit-realm.github.io/LLM-gcbfplus-website/)". 
 
 ## Dependencies
 
@@ -28,6 +26,44 @@ pip install -e .
 ```
 
 ## Run
+
+### High-level planner for deadlock resolution
+To run the high-level planner for deadlock resolution, use:
+
+```bash
+python -u  test_with_LLM.py --path logs/SingleIntegrator/gcbf+/model_with_traj/seed0_20240227110346 -n $N --epi 20 --obs $obs --max-step $ms --area-size 4  --keep-mode $km --nojit-rollout --num-incontext-prompts $k --leader_model $gpt --num_LLM_calls $num_calls
+
+```
+
+where the flags are:
+- `-n`: number of agents
+- `--obs`: number of obstacles
+- `--area-size`: side length of the environment
+- `--max-step`: maximum number of steps for each episode, increase this if you have a large environment
+- `--path`: path to the log folder
+- `--keep-mode`: keep mode for the high-level planner
+- `--num-incontext-prompts`: number of in-context examples
+- `--leader_model`: leader model for the high-level planner including 
+    - 'gpt3.5'
+    - 'gpt4'
+    - 'hand' for hand-designed heuristic leader-assignment
+    - 'fixed' for fixed leader-assignment
+    - 'random' for random leader-assignment
+    - 'none' for no leader-assignment
+- `--num_LLM_calls`: number of LLM calls for "Ensemble" implementation of the high-level planner
+
+For testing on "Randomized room" environment, use:
+
+```bash
+python -u  test_with_LLM.py --path logs/SingleIntegrator/gcbf+/model_with_traj/seed0_20240227110346/ -n 1 --epi 20 --obs 1 --preset_reset --preset_scene 'rand box' --max-step $ms --area-size 1 --keep-mode $km --nojit-rollout --num-incontext-prompts $k --leader_model $gpt --num_LLM_calls $num_calls 
+```
+where 
+-`--preset_reset` is used to reset the environment to a fixed initial state from
+    - 'rand box' for a random room environment
+    - 'original box' for a fixed room environment
+    - 'box' for room-like environment with more obstacles.
+
+### GCBF+ low-level controller for safe multi-agent navigation
 
 ### Environments
 
@@ -126,8 +162,4 @@ python test.py --env SingleIntegrator -n 16 --algo dec_share_cbf --epi 1 --area-
 
 ### Pre-trained models
 
-We provide the pre-trained models in the folder [`pretrained`](pretrained).
-
-## Acknowledgement
-
-The developers were partially supported by MITRE during the project.
+We provide the pre-trained models in the folder [`logs`](logs).
