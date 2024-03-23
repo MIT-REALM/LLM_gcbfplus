@@ -31,7 +31,7 @@ pip install -e .
 To run the high-level planner for deadlock resolution, use:
 
 ```bash
-python -u  test_with_LLM.py --path logs/SingleIntegrator/gcbf+/model_with_traj/seed0_20240227110346 -n $N --epi 20 --obs $obs --max-step $ms --area-size 4  --keep-mode $km --nojit-rollout --num-incontext-prompts $k --leader_model $gpt --num_LLM_calls $num_calls
+python -u  test_with_LLM.py --path logs/SingleIntegrator/gcbf+/model_with_traj/seed0_20240227110346 -n 10 --epi 20 --obs 25 --max-step 2500 --area-size 4  --keep-mode 20 --nojit-rollout --num-incontext-prompts 0 --leader_model 'gpt3.5' --num_LLM_calls 1
 
 ```
 
@@ -55,7 +55,7 @@ where the flags are:
 For testing on "Randomized room" environment, use:
 
 ```bash
-python -u  test_with_LLM.py --path logs/SingleIntegrator/gcbf+/model_with_traj/seed0_20240227110346/ -n 1 --epi 20 --obs 1 --preset_reset --preset_scene 'rand box' --max-step $ms --area-size 1 --keep-mode $km --nojit-rollout --num-incontext-prompts $k --leader_model $gpt --num_LLM_calls $num_calls 
+python -u  test_with_LLM.py --path logs/SingleIntegrator/gcbf+/model_with_traj/seed0_20240227110346/ -n 1 --epi 20 --obs 1 --preset_reset --preset_scene 'rand box' --max-step 2500 --area-size 1 --keep-mode 20 --nojit-rollout --num-incontext-prompts 0 --leader_model 'gpt3.5' --num_LLM_calls 1 
 ```
 where 
 -`--preset_reset` is used to reset the environment to a fixed initial state from
