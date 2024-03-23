@@ -1,0 +1,17 @@
+{\n  "Leader": 1,\n  "Direction": "To right"\n}
+{\n  "Leader": 1,\n  "Direction": "To goal"\n}
+{\n  "Leader": 9,\n  "Direction": "To goal"\n}
+{\n  "Leader": 1,\n  "Direction": "To left"\n}
+{\n  "Leader": 1,\n  "Direction": "To right"\n}
+{\n  "Leader": 8,\n  "Direction": "To right"\n}
+{\n  "Leader": 3,\n  "Direction": "To goal"\n}
+{\n  "Leader": 3,\n  "Direction": "To goal"\n}
+{\n  "Leader": 6,\n  "Direction": "To right"\n}
+{\n  "Leader": 2,\n  "Direction": "To right"\n}
+{\n  "Leader": 4,\n  "Direction": "To goal"\n}
+{\n  "Leader": 4,\n  "Direction": "To left"\n}
+{\n  "Leader": 3,\n  "Direction": "To left"\n}
+{\n  "Leader": 7,\n  "Direction": "To left"\n}
+{\n  "Leader": 3,\n  "Direction": "To left"\n}
+{\n  "Leader": 6,\n  "Direction": "To goal"\n}
+{\n  "Leader": 2,\n  "Direction": "To right"\n}
