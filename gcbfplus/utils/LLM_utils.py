@@ -13,6 +13,18 @@ from openai import OpenAI
 
 
 def get_response(prompt, model, LLM_calls=1):
+    """
+    Get the response from the LLM model given the prompt.
+    Args:
+        prompt: the prompt to be sent to the LLM model
+        model: the model to be used for the LLM
+        LLM_calls: the number of calls to the LLM model
+        fixed_prompts: the fixed prompts to be used for the LLM model (problem description and in-context examples)
+        new_prompt: the new prompt to be used for the LLM model (current deadlock environment description)
+    Returns:
+        return_message: JSON output with leader assignment from the LLM model
+        response: the complete response object from the LLM model
+    """
     client = OpenAI(
         # This is the default and can be omitted
         api_key=os.getenv("OPENAI_API_KEY"),
@@ -51,6 +63,18 @@ def get_response(prompt, model, LLM_calls=1):
 
 
 def get_info_single_graph(graph, n_agent):
+    """
+    Get the information of a single graph.
+    Args:
+        graph: the graph to get the information from
+        n_agent: the number of agents in the graph
+    Returns:
+        agent_states: the states of the agents in the graph
+        global_goal_states: the global goal states of the agents in the graph
+        temp_goal_states: the temporary goal states of the agents in the graph
+        connectivity: the connectivity of the agents in the graph
+        lidar_data: the lidar data of the agents in the graph
+    """
     agent_states = graph.type_states(0, n_agent)
     global_goal_states = graph.xg
     temp_goal_states = graph.type_states(1, n_agent)
@@ -68,6 +92,19 @@ def get_info_single_graph(graph, n_agent):
     return agent_states, global_goal_states, temp_goal_states, connectivity, lidar_data
 
 def create_user_prompt_fn(graph, n_agent, iter):
+    """
+    Create the user prompt for the LLM model.
+    Args:
+        graph: the graph to create the user prompt from
+        n_agent: the number of agents in the graph
+        iter: the iteration number
+        use_local_leader: whether to use a local leader
+        deadlock_graphs: the deadlock graphs
+        use_normalized_data: whether to use normalized data
+    Returns:
+        message: the user prompt message
+        far_agent_indices: the indices of the far agents
+    """
     # Example prompt 
     #Number of agents***5***Safety radius***0.1***Connectivity radius***1.7
     #***Agent***Id: 1, current state: (-2.28,-2.17,0.60), goal location: (1.70,1.30), obstacle seen at: (-3.00,-2.16), Id: 2, current state: (-1.99,-1.99,1.88), goal location: (2.50,0.50), obstacle seen at: (-1.20,-2.04), Id: 3, current state: (-2.21,-1.46,0.88), goal location: (1.70,0.50), obstacle seen at: (-3.00,-1.50), Id: 4, current state: (-1.82,-1.02,1.26), goal location: (2.50,1.30), obstacle seen at: (-1.20,-1.02), Id: 5, current state: (-1.59,-0.48,0.53), goal location: (2.10,2.00), obstacle seen at: (-1.20,-0.48), ***Connections***(0,1),(1,2),(2,3),(3,4),
@@ -121,9 +158,18 @@ def create_user_prompt_fn(graph, n_agent, iter):
     return message
 
 def create_assistant_prompt_fn(leader_id, dir, graph, n_agent):
-    # Example prompt 
-    #Number of agents***5***Safety radius***0.1***Connectivity radius***1.7
-    #***Agent***Id: 1, current state: (-2.28,-2.17,0.60), goal location: (1.70,1.30), obstacle seen at: (-3.00,-2.16), Id: 2, current state: (-1.99,-1.99,1.88), goal location: (2.50,0.50), obstacle seen at: (-1.20,-2.04), Id: 3, current state: (-2.21,-1.46,0.88), goal location: (1.70,0.50), obstacle seen at: (-3.00,-1.50), Id: 4, current state: (-1.82,-1.02,1.26), goal location: (2.50,1.30), obstacle seen at: (-1.20,-1.02), Id: 5, current state: (-1.59,-0.48,0.53), goal location: (2.10,2.00), obstacle seen at: (-1.20,-0.48), ***Connections***(0,1),(1,2),(2,3),(3,4),
+    """
+    Create the assistant prompt for the LLM model.
+    Args:
+        leader_id: the id of the leader
+        dir: the direction of the leader
+        graph: the graph to create the assistant prompt from
+        n_agent: the number of agents in the graph
+    Returns:
+        output_message: the assistant prompt message
+    """
+    # Example prompt: {"Leader": 1, "Direction": "To right"}
+    
     leader_i = leader_id
     leader_dir_i = dir
     #    str_output = '"Output": {'
@@ -159,6 +205,17 @@ def nominal_leader_dir_fn():
     return jnp.array(0), jnp.array([1, 0])
 
 def LLM_leader_dir_fn(response, graph, n_agent):
+    """
+    Get the leader id and direction from the LLM response.
+    Args:
+        response: the response from the LLM model
+        graph: the graph to get the leader id and direction from
+        n_agent: the number of agents in the graph
+    Returns:
+        leader_id: the id of the leader
+        LLM_direction: the direction of the leader
+    Returns None, None if there is an error in the LLM response.
+    """
     try:
         LLM_response = response
         LLM_response = LLM_response.replace('"', "'")
@@ -195,6 +252,15 @@ def LLM_leader_dir_fn(response, graph, n_agent):
     return jnp.array(leader_id), LLM_direction
 
 def create_init_prompt(num_incontext, preset=False):
+    """
+    Create the initial prompt for the LLM model.
+    Args:
+        num_incontext: the number of in-context examples
+        preset: whether to use a preset prompt
+    Returns:
+        log_message: the log message
+        log_dir: the log directory
+    """
     # start_time = datetime.datetime.now()
     # start_time = start_time.strftime("%Y%m%d%H%M%S")
 
@@ -221,6 +287,9 @@ def create_init_prompt(num_incontext, preset=False):
     return log_message, log_dir
 
 def barebone_message(LLM_response):
+    """
+    Clean the LLM response.
+    """
     LLM_response = LLM_response.replace('"', "'")
     LLM_response = LLM_response.replace('\n', '')
     LLM_response = LLM_response.replace('\n', '')
@@ -229,6 +298,16 @@ def barebone_message(LLM_response):
     return LLM_response
 
 def find_median(messages, graph, n_agent):
+    """
+    Find the median message from the LLM responses.
+    Args:
+        messages: the messages from the LLM responses
+        graph: the graph to get the leader id and direction from
+        n_agent: the number of agents in the graph
+    Returns:
+        leader_id: the id of the leader from the most frequent message
+        LLM_direction: the direction of the leader from the most frequent message
+    """
     length = len(messages)
     mess_append = []
     leader_id = None
@@ -267,6 +346,41 @@ def get_leader_id_dir(graph: GraphsTuple):
     return leader_id, leader_dir
     
 def leader_graph(graph, num_agents, jit_policy, keep_mode, jit_leader_follower_assign, leader_model, kk ,log_dir, num_runtime_incontext_prompts, leader_control, policy,prompt,all_prompts,LLM_calls,reset_graph, leader_assign_count, t_mode, prompt_time_gap, num_LLM_calls, sent_token_count, received_token_count):
+    """
+    Assign the leader to the agents in the graph.
+    Args:
+        graph: the graph to assign the leader to
+        num_agents: the number of agents in the graph
+        jit_policy: the control policy function
+        keep_mode: the number of steps to keep the leader
+        jit_leader_follower_assign: the leader follower assignment function
+        leader_model: the leader model to be used
+        kk: the current iteration number
+        log_dir: the log directory
+        num_runtime_incontext_prompts: the number of runtime in-context prompts
+        leader_control: the leader control function
+        policy: the policy to be used for the leader control
+        prompt: the prompt to be used for the LLM model
+        all_prompts: all the prompts for bookkeeping
+        LLM_calls: the number of LLM calls
+        reset_graph: the function to reset the graph
+        leader_assign_count: the number of leader assignments
+        t_mode: the mode of the graph
+        prompt_time_gap: the time gap between prompts
+        num_LLM_calls: the number of LLM calls
+        sent_token_count: the number of tokens sent to the LLM model
+        received_token_count: the number of tokens received from the LLM model
+    Returns:
+        graph: the graph with the leader assigned
+        num_LLM_calls: the number of LLM calls
+        prompt: the prompt to be used for the LLM model
+        all_prompts: all the prompts for bookkeeping
+        leader_assign_count: the number of leader assignments
+        t_mode: the mode of the graph
+        prompt_time_gap: the time gap between prompts
+        sent_token_count: the number of tokens sent to the LLM model
+        received_token_count: the number of tokens received from the LLM model
+    """
     goals = graph.type_states(type_idx=1, n_type=num_agents)
     agent_states = graph.type_states(type_idx=0, n_type=num_agents)
     
